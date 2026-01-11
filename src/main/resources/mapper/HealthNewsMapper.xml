@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kmbeast.mapper.HealthNewsMapper">
+
+    <!--展现量、浏览量、收藏量、点赞量-->
+    <select id="list" resultType="com.kmbeast.pojo.vo.HealthNewsListVO">
+        SELECT hn.id,
+        hn.title,
+        hn.summary,
+        hn.cover,
+        hn.create_time,
+        (SELECT COUNT(*) FROM flow_index fi1 WHERE fi1.content_module='HEALTH_NEWS' AND fi1.content_id = hn.id AND
+        fi1.type = 1) AS showCount,
+        (SELECT COUNT(*) FROM flow_index fi1 WHERE fi1.content_module='HEALTH_NEWS' AND fi1.content_id = hn.id AND
+        fi1.type = 2) AS viewCount,
+        (SELECT COUNT(*) FROM flow_index fi1 WHERE fi1.content_module='HEALTH_NEWS' AND fi1.content_id = hn.id AND
+        fi1.type = 3) AS upvoteCount,
+        (SELECT COUNT(*) FROM flow_index fi1 WHERE fi1.content_module='HEALTH_NEWS' AND fi1.content_id = hn.id AND
+        fi1.type = 4) AS collectionCount
+        FROM health_news hn
+        <where>
+            <if test="typeId != null">
+                AND hn.type_id = #{typeId}
+            </if>
+            <if test="title != null and title != ''">
+                AND hn.title LIKE concat('%',#{title},'%')
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND hn.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+            <if test="ids != null and ids.size() > 0">
+                AND hn.id IN
+                <foreach collection="ids" item="id" index="index" separator="," open="(" close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY
+        <choose>
+            <when test="sortField = 'viewCount'">
+                viewCount DESC
+            </when>
+            <when test="sortField = 'upvoteCount'">
+                upvoteCount DESC
+            </when>
+            <when test="sortField = 'collectionCount'">
+                collectionCount DESC
+            </when>
+            <otherwise>
+                viewCount DESC,upvoteCount DESC,collectionCount DESC
+            </otherwise>
+        </choose>
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="listPageCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM health_news hn
+        <where>
+            <if test="typeId != null">
+                AND hn.type_id = #{typeId}
+            </if>
+            <if test="title != null and title != ''">
+                AND hn.title LIKE concat('%',#{title},'%')
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND hn.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+            <if test="ids != null and ids.size() > 0">
+                AND hn.id IN
+                <foreach collection="ids" item="id" index="index" separator="," open="(" close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getVOById" resultType="com.kmbeast.pojo.vo.HealthNewsVO">
+        SELECT id,
+               type_id              AS typeId,
+               cover,
+               title,
+               content,
+               summary,
+               create_time          AS createTime,
+               (SELECT COUNT(*)
+                FROM flow_index fi1
+                WHERE fi1.content_module = 'HEALTH_NEWS'
+                  AND fi1.content_id = hn.id
+                  AND fi1.type = 2) AS viewCount,
+               (SELECT COUNT(*)
+                FROM flow_index fi1
+                WHERE fi1.content_module = 'HEALTH_NEWS'
+                  AND fi1.content_id = hn.id
+                  AND fi1.type = 3) AS upvoteCount,
+               (SELECT COUNT(*)
+                FROM flow_index fi1
+                WHERE fi1.content_module = 'HEALTH_NEWS'
+                  AND fi1.content_id = hn.id
+                  AND fi1.type = 4) AS collectionCount
+        FROM health_news hn
+        WHERE hn.id = #{id}
+    </select>
+
+    <select id="listIds" resultType="java.lang.Integer">
+        SELECT id
+        FROM health_news
+    </select>
+
+</mapper>

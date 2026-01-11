@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kmbeast.mapper.HealthModelMapper">
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT hm.id,
+        hm.name,
+        hm.detail,
+        hm.icon_url,
+        hm.unit,
+        hm.symbol,
+        hm.normal_value,
+        hm.user_id,
+        hm.is_global,
+        hm.create_time
+        FROM health_model hm
+        <where>
+            <if test="userId != null">
+                AND hm.user_id = #{userId}
+            </if>
+            <if test="name != null and name != ''">
+                AND hm.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="isGlobal != null">
+                AND hm.is_global = #{isGlobal}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND hm.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="listPageCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM health_model hm
+        <where>
+            <if test="userId != null">
+                AND hm.user_id = #{userId}
+            </if>
+            <if test="name != null and name != ''">
+                AND hm.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="isGlobal != null">
+                AND hm.is_global = #{isGlobal}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND hm.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="options" resultType="com.kmbeast.pojo.vo.HealthModelToolTipVO">
+
+        SELECT
+        hm.id AS value,
+        hm.unit AS unit,
+        hm.name AS label,
+        hm.detail
+        FROM health_model hm
+        <where>
+            <if test="userId != null">
+                AND hm.user_id = #{userId}
+            </if>
+            <if test="isGlobal != null">
+                AND hm.is_global = #{isGlobal}
+            </if>
+        </where>
+
+    </select>
+
+    <select id="modelCount" resultType="com.kmbeast.pojo.vo.HealthModelCountVO">
+
+        SELECT SUM(CASE
+                       WHEN is_global = #{isGlobal} THEN
+                           1
+                       ELSE
+                           0
+            END) AS globalModelCount,
+               SUM(CASE
+                       WHEN user_id = #{userId} THEN
+                           1
+                       ELSE
+                           0
+                   END) AS privateModelCount
+        FROM health_model
+
+    </select>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.kmbeast.pojo.entity.HealthModel">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="detail" property="detail"/>
+        <result column="icon_url" property="iconUrl"/>
+        <result column="unit" property="unit"/>
+        <result column="symbol" property="symbol"/>
+        <result column="normal_value" property="normalValue"/>
+        <result column="user_id" property="userId"/>
+        <result column="is_global" property="isGlobal"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+</mapper>

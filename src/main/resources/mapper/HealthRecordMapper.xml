@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kmbeast.mapper.HealthRecordMapper">
+
+    <select id="listLineChart" resultType="com.kmbeast.pojo.vo.HealthRecordLineChartVO">
+        SELECT
+        hr.value,
+        hr.create_time
+        FROM health_record hr
+        LEFT JOIN health_model hm ON hm.id = hr.health_model_id
+        <where>
+            <if test="userId != null">
+                AND hr.user_id = #{userId}
+            </if>
+            <if test="healthModelId != null">
+                AND hr.health_model_id = #{healthModelId}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND hr.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+        ORDER BY hr.create_time
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT hr.id,
+        hr.user_id,
+        hr.health_model_id,
+        hr.value,
+        hr.create_time,
+        u.username,
+        u.avatar,
+        hm.name AS health_model_name,
+        hm.unit AS health_model_unit,
+        hm.normal_value AS normal_value
+        FROM health_record hr
+        LEFT JOIN user u ON u.id = hr.user_id
+        LEFT JOIN health_model hm ON hm.id = hr.health_model_id
+        <where>
+            <if test="userId != null">
+                AND hr.user_id = #{userId}
+            </if>
+            <if test="healthModelId != null">
+                AND hr.health_model_id = #{healthModelId}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND hr.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="listPageCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM health_record hr
+        <where>
+            <if test="userId != null">
+                AND hr.user_id = #{userId}
+            </if>
+            <if test="healthModelId != null">
+                AND hr.health_model_id = #{healthModelId}
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND hr.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.kmbeast.pojo.vo.HealthRecordVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="health_model_id" property="healthModelId"/>
+        <result column="value" property="value"/>
+        <result column="create_time" property="createTime"/>
+        <result column="username" property="username"/>
+        <result column="avatar" property="avatar"/>
+        <result column="health_model_name" property="healthModelName"/>
+        <result column="health_model_unit" property="healthModelUnit"/>
+        <result column="normal_value" property="normalValue"/>
+    </resultMap>
+
+</mapper>

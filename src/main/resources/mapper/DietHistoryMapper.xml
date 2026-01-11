@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kmbeast.mapper.DietHistoryMapper">
+
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT dh.id, dh.user_id, dh.recipe_id, dh.detail, dh.create_time,dh.value,
+        u.username,u.avatar,
+        r.name AS recipe_name,r.cover AS recipe_cover
+        FROM diet_history dh
+        LEFT JOIN user u ON u.id = dh.user_id
+        LEFT JOIN recipe r ON r.id = dh.recipe_id
+        <where>
+            <if test="userId != null">
+                AND dh.user_id = #{userId}
+            </if>
+            <if test="recipeId != null">
+                AND dh.recipe_id = #{recipeId}
+            </if>
+            <if test="detail != null and detail != ''">
+                AND dh.detail LIKE concat('%',#{detail},'%')
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND dh.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+        ORDER BY id DESC
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="listPageCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM diet_history dh
+        <where>
+            <if test="userId != null">
+                AND dh.user_id = #{userId}
+            </if>
+            <if test="recipeId != null">
+                AND dh.recipe_id = #{recipeId}
+            </if>
+            <if test="detail != null and detail != ''">
+                AND dh.detail LIKE concat('%',#{detail},'%')
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND dh.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.kmbeast.pojo.vo.DietHistoryVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="avatar" property="avatar"/>
+        <result column="detail" property="detail"/>
+        <result column="recipe_id" property="recipeId"/>
+        <result column="recipe_name" property="recipeName"/>
+        <result column="recipe_cover" property="recipeCover"/>
+        <result column="value" property="value"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+</mapper>

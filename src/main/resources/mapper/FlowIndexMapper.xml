@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kmbeast.mapper.FlowIndexMapper">
+
+    <insert id="batchSave">
+
+        INSERT INTO flow_index (type, content_module, content_id, times, user_id, create_time) VALUES
+        <foreach collection="flowIndexList" item="flowIndex" separator="," index="index">
+            (#{flowIndex.type},#{flowIndex.contentModule},#{flowIndex.contentId},#{flowIndex.times},#{flowIndex.userId},#{flowIndex.createTime})
+        </foreach>
+
+    </insert>
+
+    <select id="list" resultType="com.kmbeast.pojo.entity.FlowIndex">
+        SELECT fi.id,
+        fi.create_time,
+        fi.content_id
+        FROM flow_index fi
+        <where>
+            <if test="userId != null">
+                AND fi.user_id = #{userId}
+            </if>
+            <if test="type != null">
+                AND fi.type = #{type}
+            </if>
+            <if test="contentModule != null and contentModule != ''">
+                AND fi.content_module = #{contentModule}
+            </if>
+            <if test="contentId != null">
+                AND fi.content_id = #{contentId}
+            </if>
+        </where>
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+
+    <select id="listPageCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM flow_index fi
+        <where>
+            <if test="userId != null">
+                AND fi.user_id = #{userId}
+            </if>
+            <if test="type != null">
+                AND fi.type = #{type}
+            </if>
+            <if test="contentModule != null and contentModule != ''">
+                AND fi.content_module = #{contentModule}
+            </if>
+            <if test="contentId != null">
+                AND fi.content_id = #{contentId}
+            </if>
+        </where>
+    </select>
+
+    <select id="listScores" resultType="com.kmbeast.pojo.vo.FlowIndexScoreVO">
+        SELECT user_id    AS userId,
+               content_id AS contentId,
+               LEAST(5,
+                     (
+                         -- 基础互动评分（浏览、点赞、收藏）
+                         (total_views * 0.25 +
+                          total_upvotes * 0.35 +
+                          total_collects * 0.4) * 0.7 +
+                             -- 时长奖励分
+                         CASE
+                             WHEN total_duration
+                                 &lt;
+                                  6000 THEN 0
+                             WHEN total_duration
+                                 &lt;
+                                  20000 THEN 0.5
+                             WHEN total_duration
+                                 &lt;
+                                  60000 THEN 1.2
+                             ELSE 1.8
+                             END
+                         ) *
+                         -- 活跃度调节因子
+                     (1 + LOG(1 + (total_views + total_upvotes + total_collects) / 10))
+               )          AS score
+        FROM (SELECT user_id,
+                     content_id,
+                     content_module,
+                     SUM(CASE WHEN type = 2 THEN 1 ELSE 0 END)     AS total_views,
+                     SUM(CASE WHEN type = 3 THEN 1 ELSE 0 END)     AS total_upvotes,
+                     SUM(CASE WHEN type = 4 THEN 1 ELSE 0 END)     AS total_collects,
+                     SUM(CASE WHEN type = 5 THEN times ELSE 0 END) AS total_duration
+              FROM flow_index
+              WHERE type IN (2, 3, 4, 5) -- 浏览(2)、点赞(3)、收藏(4)、停留(5)
+                AND content_module = #{contentModule}
+              GROUP BY user_id, content_id, content_module
+              HAVING total_views > 0
+                  OR total_upvotes > 0
+                  OR total_collects > 0) AS aggregated_data
+        ORDER BY score DESC
+    </select>
+
+</mapper>

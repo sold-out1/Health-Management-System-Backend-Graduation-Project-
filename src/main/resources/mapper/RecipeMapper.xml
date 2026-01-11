@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kmbeast.mapper.RecipeMapper">
+
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT r.id,
+        r.name,
+        r.cover,
+        r.is_audit,
+        r.is_public,
+        r.create_time,
+        u.username,
+        u.avatar
+        FROM recipe r
+        LEFT JOIN user u ON u.id = r.user_id
+        <where>
+            <if test="userId != null">
+                AND r.user_id = #{userId}
+            </if>
+            <if test="typeId != null">
+                AND r.type_id = #{typeId}
+            </if>
+            <if test="isAudit != null">
+                AND r.is_audit = #{isAudit}
+            </if>
+            <if test="isPublic != null">
+                AND r.is_public = #{isPublic}
+            </if>
+            <if test="name != null and name != ''">
+                AND r.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND r.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+            <if test="ids != null and ids.size() > 0">
+                AND r.id IN
+                <foreach collection="ids" item="id" index="index" separator="," open="(" close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+        <if test="current != null and size != null">
+            LIMIT #{current},#{size}
+        </if>
+    </select>
+    <select id="listGlobalSmart" resultMap="BaseResultMap">
+        SELECT r.id, r.name, r.cover, r.is_audit, r.is_public, r.create_time, u.username, u.avatar
+        FROM recipe r
+        LEFT JOIN user u ON u.id = r.user_id
+        <where>
+            <if test="dto.typeId != null">
+                AND r.type_id = #{dto.typeId}
+            </if>
+
+            <if test="dto.name != null and dto.name != ''">
+                AND r.name LIKE concat('%',#{dto.name},'%')
+            </if>
+
+            <choose>
+                <when test="dto.isPublic == 0">
+                    AND r.user_id = #{myId} AND r.is_public = 0
+                </when>
+
+                <when test="dto.isPublic == 1">
+                    AND r.is_public = 1 AND r.is_audit = 1
+                </when>
+
+                <otherwise>
+                    AND r.is_public = 1 AND r.is_audit = 1
+                </otherwise>
+            </choose>
+        </where>
+        ORDER BY r.create_time DESC
+        LIMIT #{dto.current}, #{dto.size}
+    </select>
+
+
+    <select id="listGlobalSmartCount" resultType="integer">
+        SELECT COUNT(*) FROM recipe r
+        <where>
+            <if test="dto.typeId != null">
+                AND r.type_id = #{dto.typeId}
+            </if>
+            <if test="dto.name != null and dto.name != ''">
+                AND r.name LIKE concat('%',#{dto.name},'%')
+            </if>
+            <choose>
+                <when test="dto.isPublic == 0">
+                    AND r.user_id = #{myId} AND r.is_public = 0
+                </when>
+                <when test="dto.isPublic == 1">
+                    AND r.is_public = 1 AND r.is_audit = 1
+                </when>
+                <otherwise>
+                    AND r.is_public = 1 AND r.is_audit = 1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+
+    <select id="selectGlobalPublic" resultMap="BaseResultMap">
+        SELECT r.id, r.name, r.cover, r.is_audit, r.is_public, r.create_time, u.username, u.avatar
+        FROM recipe r
+                 LEFT JOIN user u ON u.id = r.user_id
+        WHERE r.is_public = 1 AND r.is_audit = 1
+        ORDER BY r.create_time DESC
+            LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="selectGlobalPublicCount" resultType="integer">
+        SELECT COUNT(*) FROM recipe r WHERE r.is_public = 1 AND r.is_audit = 1
+    </select>
+    <select id="listPublic" resultMap="BaseResultMap">
+        SELECT r.id,
+        r.name,
+        r.cover,
+        r.is_audit,
+        r.is_public,
+        r.create_time,
+        u.username,
+        u.avatar
+        FROM recipe r
+        LEFT JOIN user u ON u.id = r.user_id
+        <where>
+            <if test="typeId != null">
+                AND r.type_id = #{typeId}
+            </if>
+            AND r.is_public = 1
+            AND r.is_audit = 1
+            <if test="name != null and name != ''">
+                AND r.name LIKE concat('%',#{name},'%')
+            </if>
+        </where>
+        LIMIT #{current}, #{size}
+    </select>
+
+    <select id="listPublicCount" resultType="integer">
+        SELECT COUNT(*) FROM recipe r
+        WHERE r.is_public = 1 AND r.is_audit = 1
+        <if test="typeId != null">
+            AND r.type_id = #{typeId}
+        </if>
+    </select>
+    <select id="listPageCount" resultType="integer">
+        SELECT COUNT(*)
+        FROM recipe r
+        <where>
+            <if test="userId != null">
+                AND r.user_id = #{userId}
+            </if>
+            <if test="typeId != null">
+                AND r.type_id = #{typeId}
+            </if>
+            <if test="isAudit != null">
+                AND r.is_audit = #{isAudit}
+            </if>
+            <if test="isPublic != null">
+                AND r.is_public = #{isPublic}
+            </if>
+            <if test="name != null and name != ''">
+                AND r.name LIKE concat('%',#{name},'%')
+            </if>
+            <if test="startTime != null and endTime != null">
+                AND r.create_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+            <if test="ids != null and ids.size() > 0">
+                AND r.id IN
+                <foreach collection="ids" item="id" index="index" separator="," open="(" close=")">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+    <select id="getRecipeVOById" resultType="com.kmbeast.pojo.vo.RecipeVO">
+        SELECT r.id,
+               r.name,
+               r.type_id,
+               r.cover,
+               r.content,
+               r.is_audit,
+               r.is_public,
+               r.create_time,
+               u.username,
+               u.avatar
+        FROM recipe r
+        LEFT JOIN user u ON u.id = r.user_id
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="listIds" resultType="java.lang.Integer">
+        SELECT id FROM recipe WHERE is_public = 1  AND is_audit = 1
+    </select>
+    <select id="selectPublicNames" resultType="string">
+        SELECT name FROM recipe
+        WHERE is_public = 1 AND is_audit = 1
+            LIMIT 20
+    </select>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.kmbeast.pojo.vo.RecipeListItemVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="cover" property="cover"/>
+        <result column="username" property="username"/>
+        <result column="avatar" property="avatar"/>
+        <result column="is_audit" property="isAudit"/>
+        <result column="is_public" property="isPublic"/>
+    </resultMap>
+
+</mapper>
