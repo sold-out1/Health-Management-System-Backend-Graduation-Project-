@@ -152,7 +152,7 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
 //    }
     /**
      * 用户食谱列表（公开广场）：
-     * 修改逻辑：所有用户都能查询到所有【公开】且【已审核】的食谱，不限制创建者
+     * 所有用户都能查询到所有【公开】且【已审核】的食谱，不限制创建者
      */
     @Override
     public Result<List<RecipeListItemVO>> listRecipe(RecipeQueryDto recipeQueryDto) {

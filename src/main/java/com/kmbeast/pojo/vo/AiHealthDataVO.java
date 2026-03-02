@@ -18,7 +18,7 @@ public class AiHealthDataVO {
     private Double napDuration;       // 午休时长
     private Date createTime;          // 记录时间
 
-    // --- 手动创建所有 Getter 和 Setter (为了不覆盖老代码，咱们手动补全) ---
+    // --- 手动创建所有 Getter 和 Setter ---
 
     public Double getWeight() { return weight; }
     public void setWeight(Double weight) { this.weight = weight; }

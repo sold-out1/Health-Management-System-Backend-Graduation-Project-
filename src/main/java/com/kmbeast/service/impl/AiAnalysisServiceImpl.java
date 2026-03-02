@@ -31,7 +31,7 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
     @Resource
     private HealthGoalService healthGoalService;
 
-    // 保持 API KEY 不动
+
     private final String API_KEY = "sk-b89dde3b88fa4812af560421cffe8440";
     private final String AI_URL = "https://api.deepseek.com/chat/completions";
 
@@ -43,7 +43,7 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
         Result<UserVO> userRes = userService.getById(userId);
         String username = (userRes.getData() != null) ? userRes.getData().getUsername() : "用户";
 
-        // 2. ⭐ 核心修改：适配 HealthGoal 的 type 和 status 字段
+        // 2. 适配 HealthGoal 的 type 和 status 字段
         Result<Map<String, List<HealthGoal>>> goalRes = healthGoalService.getMyGoals();
         String goalStr = "尚未设定明确的健康目标";
 
