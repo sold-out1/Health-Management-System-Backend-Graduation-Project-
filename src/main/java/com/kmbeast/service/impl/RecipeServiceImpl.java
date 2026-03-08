@@ -89,13 +89,23 @@ public class RecipeServiceImpl extends ServiceImpl<RecipeMapper, Recipe> impleme
         return listItem(recipeQueryDto);
     }
 
-    @Override
-    public Result<List<RecipeListItemVO>> listItem(RecipeQueryDto recipeQueryDto) {
-        List<RecipeListItemVO> recipeListItemVOS = this.baseMapper.list(recipeQueryDto);
-        Integer count = this.baseMapper.listPageCount(recipeQueryDto);
-        return ApiResult.success(recipeListItemVOS, count);
+//    @Override
+//    public Result<List<RecipeListItemVO>> listItem(RecipeQueryDto recipeQueryDto) {
+//        List<RecipeListItemVO> recipeListItemVOS = this.baseMapper.list(recipeQueryDto);
+//        Integer count = this.baseMapper.listPageCount(recipeQueryDto);
+//        return ApiResult.success(recipeListItemVOS, count);
+//    }
+      @Override
+     public Result<List<RecipeListItemVO>> listItem(RecipeQueryDto recipeQueryDto) {
+    // 计算分页偏移量
+    if (recipeQueryDto.getCurrent() != null && recipeQueryDto.getSize() != null) {
+        int offset = (recipeQueryDto.getCurrent() - 1) * recipeQueryDto.getSize();
+        recipeQueryDto.setCurrent(offset);
     }
-
+    List<RecipeListItemVO> recipeListItemVOS = this.baseMapper.list(recipeQueryDto);
+    Integer count = this.baseMapper.listPageCount(recipeQueryDto);
+    return ApiResult.success(recipeListItemVOS, count);
+}
     @Override
     public Result<RecipeVO> selectById(Integer id) {
         AssertUtils.notNull(id, "ID不能为空");
