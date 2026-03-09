@@ -73,7 +73,7 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
             for (HealthRecordVO vo : hrRes.getData()) {
                 if (vo.getCreateTime() == null) continue;
 
-                // 【修复核心 1】：将 LocalDateTime 转换为 java.util.Date
+                // 将 LocalDateTime 转换为 java.util.Date
                 Date timeKey = Date.from(vo.getCreateTime().atZone(ZoneId.systemDefault()).toInstant());
 
                 AiHealthDataVO data = aggregationMap.get(timeKey);
