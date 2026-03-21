@@ -87,7 +87,7 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
                 Double val = vo.getValue();
 
                 if (val != null) {
-                    // 【修复核心 2】：根据 AiHealthDataVO 的字段类型进行转换
+                    // 根据 AiHealthDataVO 的字段类型进行转换
                     if ("体重".equals(modelName)) data.setWeight(val);
                     else if ("心率".equals(modelName)) data.setHeartRate(val.intValue()); // Double 转 Integer
                     else if ("睡眠时长".equals(modelName)) data.setSleepDuration(val);

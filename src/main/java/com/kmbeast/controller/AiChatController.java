@@ -54,7 +54,7 @@ public class AiChatController {
                     .execute()
                     .body();
 
-            // 解析響應內容
+
             JSONObject jsonObject = JSONUtil.parseObj(response);
             String aiReply = jsonObject.getByPath("choices[0].message.content", String.class);
 
