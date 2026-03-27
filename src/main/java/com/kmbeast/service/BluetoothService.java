@@ -8,4 +8,7 @@ import com.kmbeast.pojo.dto.BluetoothSyncDto;
  */
 public interface BluetoothService {
     Result<String> processSyncData(BluetoothSyncDto dto);
+
+    class AiChatService {
+    }
 }
