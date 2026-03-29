@@ -43,20 +43,36 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
         String username = (userRes.getData() != null) ? userRes.getData().getUsername() : "用户";
 
         // 2. 获取健康目标
+//        Result<Map<String, List<HealthGoal>>> goalRes = healthGoalService.getMyGoals();
+//        String goalStr = "尚未设定明确的健康目标";
+//        if (goalRes.getData() != null && !goalRes.getData().isEmpty()) {
+//            goalStr = goalRes.getData().values().stream()
+//                    .flatMap(List::stream)
+//                    .map(g -> {
+//                        String typeName = (g.getType() != null && g.getType() == 1) ? "减肥" : "增肌";
+//                        String statusName = (g.getStatus() != null && g.getStatus() == 0) ? "进行中" : "未完成/已完成";
+//                        return String.format("目标:%s(当前值:%s, 目标值:%s)[%s]",
+//                                typeName, g.getCurrentValue(), g.getTargetValue(), statusName);
+//                    })
+//                    .collect(Collectors.joining("；"));
+//        }
+        // 2. 获取健康目标
         Result<Map<String, List<HealthGoal>>> goalRes = healthGoalService.getMyGoals();
         String goalStr = "尚未设定明确的健康目标";
         if (goalRes.getData() != null && !goalRes.getData().isEmpty()) {
             goalStr = goalRes.getData().values().stream()
                     .flatMap(List::stream)
+                    // 只过滤出 status 不为空且值为 0（进行中）的目标
+                    .filter(g -> g.getStatus() != null && g.getStatus() == 0)
                     .map(g -> {
                         String typeName = (g.getType() != null && g.getType() == 1) ? "减肥" : "增肌";
-                        String statusName = (g.getStatus() != null && g.getStatus() == 1) ? "已完成" : "进行中";
+                        // 因为上面已经过滤了 status == 0，这里可以直接写死状态名为"进行中"
+                        String statusName = "进行中";
                         return String.format("目标:%s(当前值:%s, 目标值:%s)[%s]",
                                 typeName, g.getCurrentValue(), g.getTargetValue(), statusName);
                     })
                     .collect(Collectors.joining("；"));
         }
-
         // 3. 聚合健康记录（彻底修复 LocalDateTime 和 Double 转换问题）
         HealthRecordQueryDto hrDto = new HealthRecordQueryDto();
         hrDto.setUserId(userId);
@@ -146,7 +162,8 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
                         "要求：\n" +
                         "1. 结合“核心目标”评价其身体指标和饮食是否匹配目标。\n" +
                         "2. 从“可选食谱”中推荐2个最符合其目标的食谱并说明原因。\n" +
-                        "3. 用Markdown格式输出报告。",
+                        "3. 用Markdown格式输出报告。"+
+                         "4.目标模块，如果是减肥那当前值和目标值是体重单位为kg，如果是增肌那当前值和目标值是体脂率单位为百分比",
                 username, goalStr, currentBodyStatus, healthDataStr, dietDataStr, String.join(",", recipes)
         );
 

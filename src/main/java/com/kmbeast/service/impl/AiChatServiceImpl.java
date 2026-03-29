@@ -28,7 +28,7 @@ public class AiChatServiceImpl implements AiChatService {
         // 提示词
         messages.add(JSONUtil.createObj()
                 .set("role", "system")
-                .set("content", "你是一个亲切温柔的健康饮食助手，请为用户提供温暖,科学和精准的建议。"));
+                .set("content", "你是一个亲切温柔的健康饮食助手，请为用户提供温暖,科学和精准的建议。给用户的回答不要有任何markdown格式，就直接一段话就可以。"));
 
         // 用户输入内容
         messages.add(JSONUtil.createObj()
