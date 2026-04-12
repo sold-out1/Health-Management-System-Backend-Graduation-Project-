@@ -15,7 +15,7 @@ public class AhoCorasickFilter {
     // 这是敏感词典，需要拓展哪些敏感词，在这里拓展
     // 如果要优化，可以新建一张数据库表，去拓展这些词典，也可以引入redis存储
     public final static List<String> sensitiveWords = Arrays.asList(
-            "暴力", "色情", "赌博", "毒品"
+            "暴力", "色情", "赌博", "毒品", "垃圾"
     );
 
     private final AcNode root = new AcNode();

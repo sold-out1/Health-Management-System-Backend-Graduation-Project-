@@ -73,7 +73,7 @@ public class AiAnalysisServiceImpl implements AiAnalysisService {
                     })
                     .collect(Collectors.joining("；"));
         }
-        // 3. 聚合健康记录（彻底修复 LocalDateTime 和 Double 转换问题）
+        // 3. 聚合健康记录
         HealthRecordQueryDto hrDto = new HealthRecordQueryDto();
         hrDto.setUserId(userId);
         hrDto.setCurrent(1);
